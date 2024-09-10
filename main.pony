@@ -40,7 +40,7 @@ actor Main
   be solve() =>
     var count : F64 = 1
     var subproblem = SequenceSubset(this)
-    while count <= (_n + _k) do
+    while count <= _n do
       subproblem.compute(_k, count)
       subproblem.is_perfect_square()
       count = count + 1

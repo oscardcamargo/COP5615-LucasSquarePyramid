@@ -30,10 +30,9 @@ actor Main
     try
       _n = env.args(1)?.f64()?
       _k = env.args(2)?.f64()?
+    else
+      return
     end
-    
-    _n = 3
-    _k = 2
     
     solve()
   

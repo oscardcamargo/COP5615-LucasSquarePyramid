@@ -6,6 +6,8 @@ actor Main
     try
     n = env.args(1)?.f64()?
     k = env.args(2)?.f64()?
+    else
+      return
     end
 
     var count : F64 = 1

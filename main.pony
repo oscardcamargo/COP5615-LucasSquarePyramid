@@ -1,20 +1,23 @@
-actor SequenceSubset
-  var _sum : F64 = -1
-  var _sqrt : U64 = 0
-  var _start : F64 = -1
+actor Computer
+  var _checker : Checker
+  
+  new create(checker : Checker) =>
+    _checker = checker
+  
+  be compute(k : F64, start : F64) =>
+    var sum = (((-1+k+start)*((2*(-1+k+start))+1)*(k+start)) / 6) - (((-1+start)*((2*(-1+start))+1)*(start)) / 6)
+    var sqrt = sum.sqrt().u64()
+    _checker.is_perfect_square(sqrt, sum, start)
+
+actor Checker
   var _main : Main
   
   new create(main : Main) =>
     _main = main
   
-  be compute(k : F64, start : F64) =>
-    _sum = (((-1+k+start)*((2*(-1+k+start))+1)*(k+start)) / 6) - (((-1+start)*((2*(-1+start))+1)*(start)) / 6)
-    _sqrt = _sum.sqrt().u64()
-    _start = start
-  
-  be is_perfect_square() =>
-    if (_sqrt * _sqrt) == F64(_sum).u64() then
-      _main.display(_start)
+  be is_perfect_square(sqrt : U64, sum : F64, start : F64) =>
+    if (sqrt * sqrt) == F64(sum).u64() then
+      _main.display(start)
     end
 
 actor Main
@@ -30,21 +33,18 @@ actor Main
     try
       _n = env.args(1)?.f64()?
       _k = env.args(2)?.f64()?
-    else
-      return
     end
     
     solve()
   
   be solve() =>
     var count : F64 = 1
-    var subproblem = SequenceSubset(this)
+    var checker = Checker(this)
+    var computer = Computer(checker)
     while count <= _n do
-      subproblem.compute(_k, count)
-      subproblem.is_perfect_square()
+      computer.compute(_k, count)
       count = count + 1
     end
-    
   
   be display(result : F64) =>
     _env.out.print(result.string())

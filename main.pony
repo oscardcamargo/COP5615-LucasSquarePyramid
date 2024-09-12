@@ -1,13 +1,28 @@
 actor Computer
   var _checker : Checker
+  var _n : F64
   
-  new create(checker : Checker) =>
+  new create(checker : Checker, n : F64) =>
     _checker = checker
+    _n = n
   
-  be compute(k : F64, start : F64) =>
-    var sum = (((-1+k+start)*((2*(-1+k+start))+1)*(k+start)) / 6) - (((-1+start)*((2*(-1+start))+1)*(start)) / 6)
-    var sqrt = sum.sqrt().u64()
-    _checker.is_perfect_square(sqrt, sum, start)
+  be compute(k : F64, start' : F64, batch_size : F64) =>
+    var sums =
+    recover
+      var sums : Array[F64] = []
+      var count : F64 = 0
+      var sum : F64 = 0
+      var start = start'
+      while (count < batch_size) and (count < _n) do
+        sum = (((-1+k+start)*((2*(-1+k+start))+1)*(k+start)) / 6) - (((-1+start)*((2*(-1+start))+1)*(start)) / 6)
+        sums.push(sum)
+        start = start + 1
+        count = count + 1
+      end
+      sums
+    end
+    
+    _checker.is_perfect_square(consume sums, start', batch_size)
 
 actor Checker
   var _main : Main
@@ -15,10 +30,32 @@ actor Checker
   new create(main : Main) =>
     _main = main
   
-  be is_perfect_square(sqrt : U64, sum : F64, start : F64) =>
-    if (sqrt * sqrt) == F64(sum).u64() then
-      _main.display(start)
+  be is_perfect_square(sums : Array[F64] iso, start' : F64, batch_size : F64) =>
+    var size : F64 = 0
+    var perfect_squares =
+    recover
+      var start = start'
+      var count : F64 = 0
+      var squares : Array[F64] = []
+      
+      while count < batch_size do
+        try
+          var sum = sums.apply(count.usize())?
+        
+          var sqrt = sum.sqrt().u64()
+          if (sqrt * sqrt) == F64(sum).u64() then
+            squares.push(start)
+            size = size + 1
+          end
+        end
+        start = start + 1
+        count = count + 1
+      end
+      
+      squares
     end
+    
+    _main.display(consume perfect_squares, size)
 
 actor Main
   var _env : Env
@@ -42,11 +79,17 @@ actor Main
   be solve() =>
     var count : F64 = 1
     var checker = Checker(this)
-    var computer = Computer(checker)
+    var computer = Computer(checker, _n)
     while count <= _n do
-      computer.compute(_k, count)
-      count = count + 1
+      computer.compute(_k, count, 10000)
+      count = count + 10000
     end
   
-  be display(result : F64) =>
-    _env.out.print(result.string())
+  be display(results : Array[F64] iso, size : F64) =>
+    var count : F64 = 0
+    while count < size do
+      try
+       _env.out.print(results.apply(count.usize())?.string())
+      end
+      count = count + 1
+    end

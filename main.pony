@@ -97,7 +97,7 @@ actor Main
       end
   
       var count : F64 = 1
-      var batch_size : F64 = 1000000
+      var batch_size : F64 = 100000
       var displayer = Displayer(env)
       var checker = Checker(displayer, batch_size)
       var computer = Computer(checker, n, k, batch_size)

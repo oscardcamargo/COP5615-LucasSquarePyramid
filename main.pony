@@ -29,11 +29,11 @@ actor Computer
     _checker.is_perfect_square(consume sums, start')
 
 actor Checker
-  var _main : Main
+  var _displayer : Displayer
   var _batch_size : F64
 
-  new create(main : Main, batch_size : F64) =>
-    _main = main
+  new create(displayer : Displayer, batch_size : F64) =>
+    _displayer = displayer
     _batch_size = batch_size
 
   be is_perfect_square(sums : Array[F64] iso, start' : F64) =>
@@ -62,35 +62,16 @@ actor Checker
     end
 
     if size > 0 then
-      _main.display(consume perfect_squares, size)
+      _displayer.display(consume perfect_squares, size)
     end
-
-actor Main
+    
+actor Displayer
   var _env : Env
-new create(env: Env) =>
+
+  new create(env : Env) =>
     _env = env
-
-    var n : F64 = -1
-    var k : F64 = -1
-
-    try
-      n = env.args(1)?.f64()?
-      k = env.args(2)?.f64()?
-    else
-      return
-    end
-
-    var count : F64 = 1
-    var batch_size : F64 = 10000
-    var checker = Checker(this, batch_size)
-    var computer = Computer(checker, n, k, batch_size)
-
-    while count <= n do
-      computer.compute(count)
-      count = count + batch_size
-    end
-
- be display(results : Array[F64] iso, size : F64) =>
+  
+  be display(results : Array[F64] iso, size : F64) =>
     var count : F64 = 0
     while count < size do
       try
@@ -98,3 +79,30 @@ new create(env: Env) =>
       end
       count = count + 1
     end
+
+actor Main
+  var _env : Env
+  
+  new create(env: Env) =>
+      _env = env
+  
+      var n : F64 = -1
+      var k : F64 = -1
+  
+      try
+        n = env.args(1)?.f64()?
+        k = env.args(2)?.f64()?
+      else
+        return
+      end
+  
+      var count : F64 = 1
+      var batch_size : F64 = 1000000
+      var displayer = Displayer(env)
+      var checker = Checker(displayer, batch_size)
+      var computer = Computer(checker, n, k, batch_size)
+  
+      while count <= n do
+        computer.compute(count)
+        count = count + batch_size
+      end

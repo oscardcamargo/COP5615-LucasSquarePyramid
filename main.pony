@@ -11,19 +11,15 @@ actor Computer
     _batch_size = batch_size
 
   be compute(start' : F64) =>
-    var sums =
-    recover
-      var sums : Array[F64] = []
-      var count : F64 = 0
-      var sum : F64 = 0
-      var start = start'
-      while (count < _batch_size) and (count < _n) do
-        sum = (((-1+_k+start)*((2*(-1+_k+start))+1)*(_k+start)) / 6) - (((-1+start)*((2*(-1+start))+1)*(start)) / 6)
-        sums.push(sum)
-       start = start + 1
-        count = count + 1
-      end
-      sums
+    var sums : Array[F64] iso = Array[F64]
+    var sum : F64 = 0
+    var start = start'
+    var end_val = start' + _batch_size
+
+    while (start < end_val) and (start <= _n) do
+      sum = (((-1+_k+start)*((2*(-1+_k+start))+1)*(_k+start)) / 6) - (((-1+start)*((2*(-1+start))+1)*(start)) / 6)
+      sums.push(sum)
+      start = start + 1
     end
 
     _checker.is_perfect_square(consume sums, start')
@@ -105,6 +101,7 @@ actor Main
       
       while index <= (n / batch_size).floor() do
         try
+          displayers.push(Displayer(env))
           checkers.push(Checker(displayer, batch_size))
           computers.push(Computer(checkers.apply(index.usize())?, n, k, batch_size))
         end

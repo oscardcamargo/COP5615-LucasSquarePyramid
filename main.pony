@@ -76,8 +76,8 @@ actor Displayer
     while count < size do
       try
        _env.out.print(results.apply(count.usize())?.string())
+       count = count + 1
       end
-      count = count + 1
     end
 
 actor Main

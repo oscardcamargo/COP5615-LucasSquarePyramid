@@ -96,13 +96,30 @@ actor Main
         return
       end
   
-      var count : F64 = 1
+      var index : F64 = 0
       var batch_size : F64 = 10000
-      var displayer = Displayer(env)
-      var checker = Checker(displayer, batch_size)
-      var computer = Computer(checker, n, k, batch_size)
+
+      var displayers : Array[Displayer] = []
+      var checkers : Array[Checker] = []
+      var computers : Array[Computer] = []
+      
+      while index <= (n / batch_size).floor() do
+        try
+          displayers.push(Displayer(env))
+          checkers.push(Checker(displayers.apply(index.usize())?, batch_size))
+          computers.push(Computer(checkers.apply(index.usize())?, n, k, batch_size))
+        end
+        index = index + 1
+      end
+      
+      var count : F64 = 1
+      index = 0
   
       while count <= n do
-        computer.compute(count)
+        try
+          computers.apply(index.usize())?.compute(count)
+        end
+        
         count = count + batch_size
+        index = index + 1
       end

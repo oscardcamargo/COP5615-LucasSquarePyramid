@@ -101,7 +101,6 @@ actor Main
       
       while index <= (n / batch_size).floor() do
         try
-          displayers.push(Displayer(env))
           checkers.push(Checker(displayer, batch_size))
           computers.push(Computer(checkers.apply(index.usize())?, n, k, batch_size))
         end
